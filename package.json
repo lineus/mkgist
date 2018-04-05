@@ -1,0 +1,33 @@
+{
+  "name": "mkgist",
+  "version": "0.0.1",
+  "description": "uses github api to create a gist from the command line.",
+  "main": "mkgist",
+  "scripts": {
+    "test": "mocha --reporter spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lineus/mkgist.git"
+  },
+  "keywords": [
+    "github",
+    "create",
+    "gist",
+    "commandline",
+    "cli"
+  ],
+  "author": "lineus (lineus@gmail.com)",
+  "license": "WTFPL",
+  "bugs": {
+    "url": "https://github.com/lineus/mkgist/issues"
+  },
+  "homepage": "https://github.com/lineus/mkgist#readme",
+  "dependencies": {
+    "commander": "^2.14.1",
+    "glob": "^7.1.2",
+    "node-fetch": "^2.1.2",
+    "request": "^2.83.0"
+  },
+  "bin": "crepo"
+}
