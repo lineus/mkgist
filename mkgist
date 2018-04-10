@@ -1,15 +1,15 @@
 #!/usr/bin/env node
-'use strict'
+'use strict';
 
-const glob = require('glob')
-const fs = require('fs')
-const path = require('path')
-const options = require(process.env.HOME + '/.env')
-const program = require('commander')
-const request = require('request')
+const glob = require('glob');
+const fs = require('fs');
+const path = require('path');
+const options = require(process.env.HOME + '/.env');
+const program = require('commander');
+const request = require('request');
 
 function sendCreateRequest (opts, obj) {
-  const uri = 'https://api.github.com/gists'
+  const uri = 'https://api.github.com/gists';
   let rArgs = {
     url: uri,
     headers: {
@@ -22,62 +22,62 @@ function sendCreateRequest (opts, obj) {
       pass: opts.GHTOKEN
     },
     body: obj
-  }
+  };
 
   request.post(rArgs, function (err, res, json) {
-    if (err) { return console.error(err) }
-    if (!json) { return console.error(res.headers) }
-    let output = JSON.parse(json, null, 2)
-    console.log(output.html_url)
-  })
+    if (err) { return console.error(err); }
+    if (!json) { return console.error(res.headers); }
+    let output = JSON.parse(json, null, 2);
+    console.log(output.html_url);
+  });
 }
 
 function makeObjects (arr) {
   return arr.map((file) => {
-    let contents = fs.readFileSync(file, 'utf8')
-    let p = path.basename(file)
-    let ret = {}
-    ret[p] = { content: contents }
-    return ret
-  })
+    let contents = fs.readFileSync(file, 'utf8');
+    let p = path.basename(file);
+    let ret = {};
+    ret[p] = { content: contents };
+    return ret;
+  });
 }
 
 function processFiles (str) {
-  let files = str.split(' ')
-  return makeObjects(files)
+  let files = str.split(' ');
+  return makeObjects(files);
 }
 
 function processGlob (pattern) {
-  let files = glob.sync(pattern, { absolute: true })
-  return makeObjects(files)
+  let files = glob.sync(pattern, { absolute: true });
+  return makeObjects(files);
 }
 
 function run (program) {
-  var outputFiles = []
+  var outputFiles = [];
 
   if (program.files) {
-    outputFiles = outputFiles.concat(processFiles(program.files))
+    outputFiles = outputFiles.concat(processFiles(program.files));
   }
 
   if (program.glob) {
-    processGlob(program.glob)
-    outputFiles = outputFiles.concat(processGlob(program.glob))
+    processGlob(program.glob);
+    outputFiles = outputFiles.concat(processGlob(program.glob));
   }
 
   const out = {
     public: program.public || false,
     description: program.description,
     files: {}
-  }
+  };
 
   outputFiles.forEach((file) => {
-    let key = Object.keys(file)[0]
-    out.files[key] = { content: file[key].content }
-  })
+    let key = Object.keys(file)[0];
+    out.files[key] = { content: file[key].content };
+  });
 
-  let x = JSON.stringify(out)
+  let x = JSON.stringify(out);
 
-  sendCreateRequest(options, x)
+  sendCreateRequest(options, x);
 }
 
 program.version('0.0.1')
@@ -86,6 +86,6 @@ program.version('0.0.1')
   .option('-d, --description <str>', 'Repo Description')
   .option('-f, --files <files>', 'space separated list of files')
   .option('-g, --glob <glob>', 'glob to match files/paths')
-  .parse(process.argv)
+  .parse(process.argv);
 
-run(program)
+run(program);
