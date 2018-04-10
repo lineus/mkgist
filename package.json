@@ -1,6 +1,6 @@
 {
   "name": "mkgist",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "uses github api to create a gist from the command line.",
   "main": "mkgist",
   "scripts": {
