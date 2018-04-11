@@ -9,6 +9,7 @@ const path = require('path');
 const options = require(process.env.HOME + '/.env');
 const program = require('commander');
 const request = require('request');
+const strip = require('strip-ansi');
 
 function sendCreateRequest (inputJSON) {
   const uri = 'https://api.github.com/gists';
@@ -59,7 +60,6 @@ async function main (program) {
     content: text
   };
 
-  // store the local requirements in out.files obj with their names
   const textLines = text.split('\n');
   textLines.forEach(function (line) {
     let re = /.* require\('(\.\/[.\w]+)'\)/;
@@ -71,11 +71,12 @@ async function main (program) {
 
   const outputFiles = makeObjects(files);
   outputFiles.unshift(command);
+  
   const { stdout } = await runIt(program.run);
   const outString = `$: ${program.run}\n${stdout}\n$: `;
   const output = {
     'output.txt': {
-      content: outString
+      content: strip(outString)
     }
   };
 
