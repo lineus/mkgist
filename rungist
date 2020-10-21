@@ -6,33 +6,44 @@ const { exec } = require('child_process');
 const runIt = util.promisify(exec);
 const fs = require('fs');
 const path = require('path');
-const options = require(process.env.HOME + '/.env');
+const { options } = require(process.env.HOME + '/.env');
 const program = require('commander');
-const request = require('request');
+const fetch = require('node-fetch');
 const strip = require('strip-ansi');
 
 function sendCreateRequest (inputJSON) {
-  const uri = 'https://api.github.com/gists';
   let rArgs = {
-    url: uri,
+    method: 'POST',
     headers: {
       'User-Agent': options.UA,
       'Content-Type': 'application/json',
-      'Accept': 'application/vnd.github.v3.full+json'
-    },
-    auth: {
-      user: options.GHUSER,
-      pass: options.GHTOKEN
+      'Accept': 'application/vnd.github.v3+json',
+      'Authorization': 'token ' + options.GHTOKEN
     },
     body: inputJSON
   };
 
-  request.post(rArgs, function (err, res, json) {
-    if (err) { return console.error(err); }
-    if (!json) { return console.error(res.headers); }
-    let output = JSON.parse(json, null, 2);
-    console.log(output.html_url);
-  });
+  return fetch('https://api.github.com/gists', rArgs)
+    .then(res => {
+      if (res.status > 201) {
+        console.error('RequestFailure');
+        console.dir(res);
+        process.exit(1);
+      }
+      return res.json();
+    })
+    .then(json => {
+      if (!json || !json.html_url) {
+        console.error('JSONFailure');
+        console.dir(json);
+        process.exit(1);
+      }
+      console.log(json.html_url);
+    })
+    .catch(err => {
+      console.error(err);
+      process.exit(1);
+    });
 }
 
 function makeObjects(arr) {
@@ -71,7 +82,7 @@ async function main (program) {
 
   const outputFiles = makeObjects(files);
   outputFiles.unshift(command);
-  
+
   const { stdout } = await runIt(program.run);
   const outString = `$: ${program.run}\n${stdout}\n$: `;
   const output = {
@@ -91,6 +102,7 @@ async function main (program) {
   sendCreateRequest(bodyData);
 }
 
+program.storeOptionsAsProperties(true);
 program.version('0.0.1')
   .description('Run a command, make a gist with the command and output')
   .option('-p, --public', 'Make a public gist')
